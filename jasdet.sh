@@ -26,17 +26,17 @@ if [ $# -eq 0 ] || [[ -z "$1" ]]; then
 elif [[ "$1" != '-v' ]] || [[ "$1" != '-h' ]]; then
 	domain=$1
 	if [[ -e "/usr/share/fierce/hosts.txt" ]]; then #our defualt wordlist is set to Fierce's wordlist
-                wordlist='/usr/share/fierce/hosts.txt'
+                wordlist=/usr/share/fierce/hosts.txt
 	else
                	#lets get SecLists top 5000 for brute forcing
                	wget -O ~/wordlist.txt https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/deepmagic.com-prefixes-top50000.txt > /dev/null 2>&1
-               	wordlist='~/wordlist.txt'
+               	wordlist=~/wordlist.txt
        	fi
 fi
 # first case statement for help & version on arguement 1
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
   -v | --version )
-    echo "vesion 1.3"
+    echo "vesion 1.4"
     exit
     ;;
   -h | --help )
@@ -54,11 +54,11 @@ while [[ "$2" =~ ^- && ! "$2" == "--" ]]; do case $2 in
 	if [ -z "$3" ] || [[ "$3" =~ ^-.* ]]; then # check next arguemnt to see if its empty or starts with '-'
 		echo "No wordlist supplied! Using default";
 		if [[ -e "/usr/share/fierce/hosts.txt" ]]; then #our defualt wordlist is set to Fierce's wordlist
-                	wordlist='/usr/share/fierce/hosts.txt'
+                	wordlist=/usr/share/fierce/hosts.txt
 		else
                		#lets get SecLists top 5000 for brute forcing
                 	wget -O ~/wordlist.txt https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/deepmagic.com-prefixes-top50000.txt > /dev/null 2>&1
-                	wordlist='~/wordlist.txt'
+                	wordlist=~/wordlist.txt
         	fi
 	else
 		if [[ -e "$3" ]]; then
@@ -67,11 +67,11 @@ while [[ "$2" =~ ^- && ! "$2" == "--" ]]; do case $2 in
 		else
 			#check for default worlist file
  			if [[ -e "/usr/share/fierce/hosts.txt" ]]; then
-                		wordlist='/usr/share/fierce/hosts.txt'
+                		wordlist=/usr/share/fierce/hosts.txt
 			else
                		#lets get SecLists top 5000 for brute forcing
                 		wget -O ~/wordlist.txt https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/deepmagic.com-prefixes-top50000.txt > /dev/null 2>&1
-                		wordlist='~/wordlist.txt'
+                		wordlist=~/wordlist.txt
         		fi
 		fi
 	fi
@@ -96,6 +96,20 @@ while [[ "$2" =~ ^- && ! "$2" == "--" ]]; do case $2 in
     ;;
 esac; shift; done
 if [[ "$2" == '--' ]]; then shift; fi
+
+#===============================
+# Check if host command is installed
+#===============================
+if ! command -v host &> /dev/null
+then
+    if hostnamectl | grep 'CentOS\|Red'
+    then
+    	yum install bind-utils -y &>/dev/null
+    else
+			apt-get install bind9-utils -y &> /dev/null
+  	fi
+fi
+
 
 #check for wildcard using a rand number .root.domain
 randy=$(( RANDOM % 15000))
